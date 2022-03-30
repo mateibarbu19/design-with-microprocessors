@@ -32,7 +32,7 @@ void setup() {
   TCCR1B = 0;
   TCNT1  = 0;
 
-  OCR1A = 31249;            // compare match register 16MHz/256/2Hz-1
+  OCR1A = 62499;            // compare match register 16MHz/256/2Hz-1
   TCCR1B |= (1 << WGM12);   // CTC mode
   val = 4;
   TCCR1B |= decode(val);    // 256 prescaler
@@ -40,6 +40,7 @@ void setup() {
 
   EICRA |= (1 << ISC11);   // set interrupt on falling edge
   EIMSK |= (1 << INT1);                   // enable INT1 interrupt
+
   sei();
 }
 
@@ -100,20 +101,18 @@ void displayDigit(int digit)
     digitalWrite(f, LOW);
 }
 
-int i = 0;
+int i = 10;
 
 ISR(TIMER1_COMPA_vect) {
   turnOff();
   displayDigit(i);
-  i += 1;
-  if (i == 10)
+  i -= 1;
+  if (i == -1)
     i = 0;
 }
 
 ISR(INT1_vect) {
-  TCCR1B &= ~decode(val);
-  val = (val + 1) % 5;
-  TCCR1B |= decode(val);
+  i = 10;
 }
 
 void loop()

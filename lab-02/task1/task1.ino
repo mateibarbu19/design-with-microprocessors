@@ -12,8 +12,6 @@ int lastButtonState = HIGH;   // valoarea anterioara a starii butonului
 unsigned const int Button = 3;
 unsigned const int LED = 5;
 
-int val;
-
 void setup() {
   pinMode(Button, INPUT_PULLUP);
 
@@ -34,29 +32,9 @@ void setup() {
 
   OCR1A = 31249;            // compare match register 16MHz/256/2Hz-1
   TCCR1B |= (1 << WGM12);   // CTC mode
-  val = 4;
-  TCCR1B |= decode(val);    // 256 prescaler
+  TCCR1B |= (1 << CS12);    // 256 prescaler
   TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
-
-  EICRA |= (1 << ISC11);   // set interrupt on falling edge
-  EIMSK |= (1 << INT1);                   // enable INT1 interrupt
   sei();
-}
-
-int decode(int pre) {
-  if (pre == 0) { 
-    return 1 << CS10;
-  }
-  if (pre == 1) { 
-    return 1 << CS11;
-  }
-  if (pre == 2) {
-    return (1 << CS11) | (1 << CS10);
-  }
-  if (pre == 3) {
-    return 1 << CS12;
-  }
-  return (1 << CS12) | (1 << CS10);
 }
 
 void turnOff()
@@ -108,12 +86,6 @@ ISR(TIMER1_COMPA_vect) {
   i += 1;
   if (i == 10)
     i = 0;
-}
-
-ISR(INT1_vect) {
-  TCCR1B &= ~decode(val);
-  val = (val + 1) % 5;
-  TCCR1B |= decode(val);
 }
 
 void loop()
